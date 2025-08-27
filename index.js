@@ -1,25 +1,25 @@
 import express from "express";
-import { exec } from "child_process";
 import cors from "cors";
+import bodyParser from "body-parser";
 
 const app = express();
+const PORT = process.env.PORT || 5000;
+
 app.use(cors());
-app.use(express.json());
+app.use(bodyParser.json());
 
 app.post("/download", (req, res) => {
   const { url, quality, type } = req.body;
-  if (!url) return res.status(400).json({ error: "URL required" });
 
-  let command = `yt-dlp -f ${quality} -o "%(title)s.%(ext)s" ${url}`;
+  console.log(`Download request received: URL: ${url}, Quality: ${quality}, Type: ${type}`);
 
-  exec(command, (error, stdout, stderr) => {
-    if (error) {
-      console.error(stderr);
-      return res.status(500).json({ error: "Download failed" });
-    }
-    return res.json({ message: "Download started", log: stdout });
-  });
+  if (type === "video") {
+    res.json({ message: `Video download started at quality: ${quality}` });
+  } else {
+    res.json({ message: `Audio download started` });
+  }
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Backend running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Backend running on port ${PORT}`);
+});
